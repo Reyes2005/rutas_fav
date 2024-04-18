@@ -17,14 +17,13 @@ import tones
 from scriptHandler import script
 #Importamos librerías externas a NVDA
 import os
-import sys
 import subprocess
-import time
 import json
 
 class pathsInput(wx.Dialog):
-	def __init__(self, frame):
+	def __init__(self, frame, data):
 		super(pathsInput, self).__init__(None, -1, title=_("Ingresar ruta"))
+		self.data = data
 		self.frame = frame
 		self.Panel = wx.Panel(self)
 		label1 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Ruta absoluta que desee guardar (usar marcadores si están disponibles):"))
@@ -56,18 +55,17 @@ class pathsInput(wx.Dialog):
 
 	def onAccept(self, event):
 		if any(value == "" for value in [self.path.GetValue(), self.identifier.GetValue()]):
-			msg = "Asegúrese de llenar correctamente los campos solicitados."
-			ui.message(msg)
+			ui.message(_("Asegúrese de llenar correctamente los campos solicitados."))
 			self.path.SetFocus() if self.path.GetValue() == "" else self.identifier.SetFocus() if self.identifier.GetValue() == "" else None
 			return
 
 		pathValue, identifierValue = self.path.GetValue(), self.identifier.GetValue()
-		if os.path.exists(pathValue) and not identifierValue in self.paths['identifier']:
-			self.paths['path'].append(pathValue)
-			self.paths['identifier'].append(identifierValue)
-			self._saveInfo()
-			if self.empty:
-				self.empty = False
+		if os.path.exists(pathValue) and not identifierValue in self.data.paths['identifier']:
+			self.data.paths['path'].append(pathValue)
+			self.data.paths['identifier'].append(identifierValue)
+			self.data._saveInfo()
+			if self.data.empty:
+				self.data.empty = False
 
 		if self.IsModal():
 			self.EndModal(0)
@@ -99,7 +97,6 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		super(GlobalPlugin, self).__init__()
 		self.paths = self._loadInfo()
 		self.counter = -1
-		self.last_time = 0
 		self.empty = not self.paths
 
 	def _loadInfo(self):
@@ -119,15 +116,15 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			filename = os.path.join(globalVars.appArgs.configPath, "addons", "rutas_fav", "data.json")
 			with open(filename, "w") as f:
 				json.dump(self.paths, f)
-				tones.beep(440, 100)
+				tones.beep(440, 300)
 				ui.message("Información guardada correctamente.")
 
 	@script(
 		description="Abre un cuadro de texto para ingresar nuevas rutas a añadir a la lista",
-		gesture="kb:alt+NVDA+a",
+		gesture="kb:alt+NVDA+l",
 	)
 	def script_addNewPath(self, gesture):
-		pathsI = pathsInput(gui.mainFrame, )
+		pathsI = pathsInput(gui.mainFrame, self)
 		pathsI.run()
 
 	@script(
@@ -139,7 +136,6 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			ui.message("¡No hay rutas guardadas!")
 
 		else:
-			ui.message(len(self.paths))
 			self.counter -= 1
 			if self.counter < 0:
 				self.counter = len(self.paths['path'])-1
