@@ -19,6 +19,7 @@ from scriptHandler import script
 import os
 import subprocess
 import json
+import time
 
 class pathsInput(wx.Dialog):
 	def __init__(self, frame, data):
@@ -120,7 +121,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				ui.message("Información guardada correctamente.")
 
 	@script(
-		description="Abre un cuadro de texto para ingresar nuevas rutas a añadir a la lista",
+		description="Abre un cuadro de texto para ingresar nuevas rutas a añadir a la lista de rutas favoritas",
 		gesture="kb:alt+NVDA+l",
 	)
 	def script_addNewPath(self, gesture):
@@ -128,7 +129,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		pathsI.run()
 
 	@script(
-		description="Va a la ruta anterior en la lista",
+		description="Va al elemento anterior en la lista de rutas favoritas",
 		gesture="kb:alt+NVDA+j"
 	)
 	def script_previousPath(self, gesture):
@@ -143,7 +144,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			ui.message(f"{self.paths['identifier'][self.counter]} {self.counter+1} de {len(self.paths['path'])}")
 
 	@script(
-		description="Va a la siguiente ruta en la lista",
+		description="Va al siguiente elemento en la lista de rutas favoritas",
 		gesture="kb:alt+NVDA+k"
 	)
 	def script_nextPath(self, gesture):
