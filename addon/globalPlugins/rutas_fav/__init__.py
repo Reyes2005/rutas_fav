@@ -97,7 +97,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		self.empty = not self.paths
 
 	def _loadInfo(self):
-		filename = os.path.join(globalVars.appArgs.configPath, "addons", "rutas_fav", "data.json")
+		filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json")
 		paths = {"path": [], "identifier": []}
 		try:
 			with open(filename, "r") as f:
@@ -110,7 +110,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 	def _saveInfo(self):
 		if self.paths:
-			filename = os.path.join(globalVars.appArgs.configPath, "addons", "rutas_fav", "data.json")
+			filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json")
 			with open(filename, "w") as f:
 				json.dump(self.paths, f)
 				tones.beep(440, 300)
