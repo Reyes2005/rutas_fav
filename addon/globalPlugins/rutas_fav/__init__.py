@@ -17,13 +17,12 @@ import tones
 from scriptHandler import script
 #Importamos librerías externas a NVDA
 import os
-import subprocess
 import json
 import time
 
-class pathsInput(wx.Dialog):
+class pathsDialog(wx.Dialog):
 	def __init__(self, frame, data):
-		super(pathsInput, self).__init__(None, -1, title=_("Ingresar ruta"))
+		super(pathsDialog, self).__init__(None, -1, title=_("Ingresar ruta"))
 		self.data = data
 		self.frame = frame
 		self.Panel = wx.Panel(self)
@@ -50,9 +49,6 @@ class pathsInput(wx.Dialog):
 		sizeV.Add(sizeH, 0, wx.EXPAND)
 		self.Panel.SetSizer(sizeV)
 		self.CenterOnScreen()
-
-	def run(self):
-		self.Show()
 
 	def onAccept(self, event):
 		if any(value == "" for value in [self.path.GetValue(), self.identifier.GetValue()]):
@@ -122,11 +118,15 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 	@script(
 		description="Abre un cuadro de texto para ingresar nuevas rutas a añadir a la lista de rutas favoritas",
-		gesture="kb:alt+NVDA+l",
+		gesture="kb:alt+NVDA+a",
 	)
 	def script_addNewPath(self, gesture):
-		pathsI = pathsInput(gui.mainFrame, self)
-		pathsI.run()
+		dialog = pathsDialog(gui.mainFrame, self)
+		if not dialog.IsShown():
+			gui.mainFrame.prePopup()
+			dialog.Show()
+			dialog.CentreOnScreen()
+			gui.mainFrame.postPopup()
 
 	@script(
 		description="Va al elemento anterior en la lista de rutas favoritas",
