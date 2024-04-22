@@ -60,9 +60,13 @@ class pathsDialog(wx.Dialog):
 		if os.path.exists(pathValue) and not identifierValue in self.data.paths['identifier']:
 			self.data.paths['path'].append(pathValue)
 			self.data.paths['identifier'].append(identifierValue)
-			self.data._saveInfo()
 			if self.data.empty:
 				self.data.empty = False
+
+			result = self.data._saveInfo()
+			if result:
+				tones.beep(432, 300)
+				ui.message(_("Ruta añadida correctamente."))
 
 		if self.IsModal():
 			self.EndModal(0)
@@ -95,6 +99,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		self.paths = self._loadInfo()
 		self.counter = -1
 		self.empty = not self.paths
+		self.lastPressTime = 0
 
 	def _loadInfo(self):
 		filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json")
@@ -113,8 +118,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json")
 			with open(filename, "w") as f:
 				json.dump(self.paths, f)
-				tones.beep(440, 300)
-				ui.message("Información guardada correctamente.")
+				return True
+		return False
 
 	@script(
 		description="Abre un cuadro de texto para ingresar nuevas rutas a añadir a la lista de rutas favoritas",
@@ -129,12 +134,40 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			gui.mainFrame.postPopup()
 
 	@script(
+		description="Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la lista de rutas favoritas",
+		gesture="kb:alt+NVDA+l",
+	)
+	def script_launchOrDeletePath(self, gesture):
+		if self.empty:
+			ui.message(_("¡No hay rutas guardadas!"))
+			return
+
+		if not os.path.exists(self.paths['path'][self.counter]):
+			ui.message(_("La ruta guardada no existe o está mal escrita."))
+			del self.paths['path'][self.counter]
+			del self.paths['identifier'][self.counter]
+			if self.counter > len(self.paths)-1:
+				self.counter = len(self.paths)-1
+
+		currentTime = time.time()
+		if (currentTime - self.lastPressTime) < 0.8:
+			del self.paths['path'][self.counter]
+			del self.paths['identifier'][self.counter]
+			ui.message(_("Ruta eliminada correctamente de la lista."))
+			self._saveInfo()
+
+		else:
+			os.startfile(self.paths['path'][self.counter])
+
+		self.lastPressTime = currentTime
+
+	@script(
 		description="Va al elemento anterior en la lista de rutas favoritas",
 		gesture="kb:alt+NVDA+j"
 	)
 	def script_previousPath(self, gesture):
 		if self.empty:
-			ui.message("¡No hay rutas guardadas!")
+			ui.message(_("¡No hay rutas guardadas!"))
 
 		else:
 			self.counter -= 1
@@ -149,7 +182,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	)
 	def script_nextPath(self, gesture):
 		if self.empty:
-			ui.message("¡No hay rutas guardadas!")
+			ui.message(_("¡No hay rutas guardadas!"))
 
 		else:
 			self.counter += 1
