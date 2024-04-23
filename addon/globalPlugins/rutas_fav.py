@@ -27,10 +27,12 @@ class pathsDialog(wx.Dialog):
 		self.frame = frame
 		self.Panel = wx.Panel(self)
 		label1 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Ruta absoluta que desee guardar (usar marcadores si están disponibles):"))
-		self.path = wx.TextCtrl(self.Panel, wx.ID_ANY)
+		self.path = wx.TextCtrl(self.Panel, wx.ID_ANY|wx.TE_PROCESS_ENTER)
 		label2 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Identificador de la ruta (nombre a mostrar en el menú virtual):"))
-		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY)
+		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY|wx.TE_PROCESS_ENTER)
 		self.acceptBTN = wx.Button(self.Panel, 0, label=_("&Aceptar"))
+		self.Bind(wx.EVT_TEXT_ENTER, self.onAccept, id=self.path.GetId())
+		self.Bind(wx.EVT_TEXT_ENTER, self.onAccept, id=self.identifier.GetId())
 		self.Bind(wx.EVT_BUTTON, self.onAccept, id=self.acceptBTN.GetId())
 		self.cancelBTN = wx.Button(self.Panel, 1, label=_("Cancelar"))
 		self.Bind(wx.EVT_BUTTON, self.onCancel, id=self.cancelBTN.GetId())
@@ -57,6 +59,7 @@ class pathsDialog(wx.Dialog):
 			return
 
 		pathValue, identifierValue = self.path.GetValue(), self.identifier.GetValue()
+		ui.message(f"valores: {pathValue}, {identifierValue}")
 		if os.path.exists(pathValue) and not identifierValue in self.data.paths['identifier']:
 			self.data.paths['path'].append(pathValue)
 			self.data.paths['identifier'].append(identifierValue)
@@ -114,11 +117,10 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		return paths
 
 	def _saveInfo(self):
-		if self.paths:
-			filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json")
-			with open(filename, "w") as f:
-				json.dump(self.paths, f)
-				return True
+		filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json")
+		with open(filename, "w") as f:
+			json.dump(self.paths, f)
+			return True
 		return False
 
 	@script(
@@ -146,8 +148,12 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			ui.message(_("La ruta guardada no existe o está mal escrita."))
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
-			if self.counter > len(self.paths)-1:
-				self.counter = len(self.paths)-1
+			self._saveInfo()
+			if self.counter > len(self.paths['path'])-1:
+				self.counter = len(self.paths['path'])-1
+
+			if not self.paths['path'] and not self.empty:
+				self.empty = True
 
 		currentTime = time.time()
 		if (currentTime - self.lastPressTime) < 0.8:
@@ -155,6 +161,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			del self.paths['identifier'][self.counter]
 			ui.message(_("Ruta eliminada correctamente de la lista."))
 			self._saveInfo()
+			if not self.paths['path'] and not self.empty:
+				self.empty = True
 
 		else:
 			os.startfile(self.paths['path'][self.counter])
