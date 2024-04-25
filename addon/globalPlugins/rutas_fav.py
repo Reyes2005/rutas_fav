@@ -26,29 +26,35 @@ class pathsDialog(wx.Dialog):
 		self.data = data
 		self.frame = frame
 		self.Panel = wx.Panel(self)
+
 		label1 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Ruta absoluta que desee guardar (usar marcadores si están disponibles):"))
-		self.path = wx.TextCtrl(self.Panel, wx.ID_ANY|wx.TE_PROCESS_ENTER)
+		self.path = wx.TextCtrl(self.Panel, wx.ID_ANY)
+
 		label2 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Identificador de la ruta (nombre a mostrar en el menú virtual):"))
-		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY|wx.TE_PROCESS_ENTER)
+		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY)
+
 		self.acceptBTN = wx.Button(self.Panel, 0, label=_("&Aceptar"))
-		self.Bind(wx.EVT_TEXT_ENTER, self.onAccept, id=self.path.GetId())
-		self.Bind(wx.EVT_TEXT_ENTER, self.onAccept, id=self.identifier.GetId())
 		self.Bind(wx.EVT_BUTTON, self.onAccept, id=self.acceptBTN.GetId())
 		self.cancelBTN = wx.Button(self.Panel, 1, label=_("Cancelar"))
 		self.Bind(wx.EVT_BUTTON, self.onCancel, id=self.cancelBTN.GetId())
 		self.webBTN = wx.Button(self.Panel, 2, label=_("&Visitar la web del desarrollador"))
 		self.Bind(wx.EVT_BUTTON, self.onWeb, id=self.webBTN.GetId())
+
 		self.Bind(wx.EVT_CHAR_HOOK, self.onkeyWindowDialog)
 		sizeV = wx.BoxSizer(wx.VERTICAL)
 		sizeH = wx.BoxSizer(wx.HORIZONTAL)
+
 		sizeV.Add(label1, 0, wx.EXPAND)
 		sizeV.Add(self.path, 0, wx.EXPAND)
 		sizeV.Add(label2, 0, wx.EXPAND)
 		sizeV.Add(self.identifier, 0, wx.EXPAND)
+
 		sizeH.Add(self.acceptBTN, 2, wx.EXPAND)
 		sizeH.Add(self.cancelBTN, 2, wx.EXPAND)
 		sizeH.Add(self.webBTN, 2, wx.EXPAND)
+
 		sizeV.Add(sizeH, 0, wx.EXPAND)
+
 		self.Panel.SetSizer(sizeV)
 		self.CenterOnScreen()
 
@@ -59,7 +65,6 @@ class pathsDialog(wx.Dialog):
 			return
 
 		pathValue, identifierValue = self.path.GetValue(), self.identifier.GetValue()
-		ui.message(f"valores: {pathValue}, {identifierValue}")
 		if os.path.exists(pathValue) and not identifierValue in self.data.paths['identifier']:
 			self.data.paths['path'].append(pathValue)
 			self.data.paths['identifier'].append(identifierValue)
@@ -71,6 +76,9 @@ class pathsDialog(wx.Dialog):
 				tones.beep(432, 300)
 				ui.message(_("Ruta añadida correctamente."))
 
+		else:
+			ui.message(_("Imposible añadir la ruta a la lista pues el identificador de esta ya existe, favor de escribirlo de diferente manera."))
+
 		if self.IsModal():
 			self.EndModal(0)
 		else:
@@ -80,7 +88,7 @@ class pathsDialog(wx.Dialog):
 		wx.LaunchDefaultBrowser("https://reyesgamer.com/")
 
 	def onkeyWindowDialog(self, event):
-		if event.GetKeyCode() == 27: # Pulsamos ESC y cerramos la ventana
+"		if event.GetKeyCode() == 27: # Pulsamos ESC y cerramos la ventana
 			if self.IsModal():
 				self.EndModal(1)
 			else:
@@ -101,7 +109,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		super(GlobalPlugin, self).__init__()
 		self.paths = self._loadInfo()
 		self.counter = -1
-		self.empty = not self.paths
+		self.empty = not self.paths['path']
 		self.lastPressTime = 0
 
 	def _loadInfo(self):
@@ -156,16 +164,16 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				self.empty = True
 
 		currentTime = time.time()
-		if (currentTime - self.lastPressTime) < 0.8:
+		if (currentTime - self.lastPressTime) > 0.5:
+			os.startfile(self.paths['path'][self.counter])
+
+		else:
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
 			ui.message(_("Ruta eliminada correctamente de la lista."))
 			self._saveInfo()
 			if not self.paths['path'] and not self.empty:
 				self.empty = True
-
-		else:
-			os.startfile(self.paths['path'][self.counter])
 
 		self.lastPressTime = currentTime
 
