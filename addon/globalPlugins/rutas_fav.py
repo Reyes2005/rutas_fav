@@ -14,6 +14,8 @@ import wx
 import gui
 import globalVars
 import tones
+import addonHandler
+addonHandler.initTranslation()
 from scriptHandler import script
 #Importamos librerías externas a NVDA
 import os
