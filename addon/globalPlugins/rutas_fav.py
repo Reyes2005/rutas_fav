@@ -135,6 +135,15 @@ class pathsDialog(wx.Dialog):
 		else:
 			self.Close()
 
+def disableInSecureMode(decoratedCls):
+	"""
+	Decorador para deshabilitar el uso de la clase a decorar en pantallas seguras.
+	"""
+	if globalVars.appArgs.secure: #Si se detecta la ejecución en este tipo de pantallas, se devuelve una instancia sin modificar de globalPluginHandler.GlobalPlugin, si no es así se devuelve la clase decorada.
+		return globalPluginHandler.GlobalPlugin
+	return decoratedCls
+
+@disableInSecureMode #Se llama al decorador para deshabilitar el uso del complemento en pantallas seguras.
 class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	"""
 	Clase que hereda de globalPluginHandler.GlobalPlugin para hacer los scripts relacionados a cada combinación de teclas pulsada, así como otras operaciones lógicas para el funcionamiento del addon.
