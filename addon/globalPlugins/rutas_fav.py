@@ -39,17 +39,24 @@ class pathsDialog(wx.Dialog):
 		self.Panel = wx.Panel(self)
 
 		#Se crean los cuadros de texto junto con su etiqueta, para de esta forma añadirlos más adelante.
+		#Translators: Label for the text area in which the absolute path will be entered using markers if these are available.
 		label1 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Ruta absoluta que desee guardar (usar marcadores si están disponibles):"))
 		self.path = wx.TextCtrl(self.Panel, wx.ID_ANY)
 
+		#Translators: Label for the text area where a common name will be written to identify the saved path.
 		label2 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Identificador de la ruta (nombre a mostrar en el menú virtual):"))
 		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY)
 
 		#Se crean los botones junto con su respectiva vinculación a un método de evento que ejecutará ciertas acciones en base a si son pulsados.
+		#Translators: It is the accept button to confirm the data entered.
 		self.acceptBTN = wx.Button(self.Panel, 0, label=_("&Aceptar"))
 		self.Bind(wx.EVT_BUTTON, self.onAccept, id=self.acceptBTN.GetId())
+
+		#Translators: It is the cancel button to cancel the process and close the dialog.
 		self.cancelBTN = wx.Button(self.Panel, 1, label=_("Cancelar"))
 		self.Bind(wx.EVT_BUTTON, self.onCancel, id=self.cancelBTN.GetId())
+
+		#Translators: It is the web button to open the developer website in the browser.
 		self.webBTN = wx.Button(self.Panel, 2, label=_("&Visitar la web del desarrollador"))
 		self.Bind(wx.EVT_BUTTON, self.onWeb, id=self.webBTN.GetId())
 
@@ -80,6 +87,7 @@ class pathsDialog(wx.Dialog):
 		Método que responde al evento de pulsar el botón aceptar.
 		"""
 		if any(value == "" for value in [self.path.GetValue(), self.identifier.GetValue()]): #Se verifica si no existe contenido en cualquiera de los dos campos de texto no para luego lanzar un mensaje de advertencia y enfocar el cuadro correspondiente.
+			#Translators: Message to indicate that the operation failed because one or both of the text areas are empty.
 			ui.message(_("Asegúrese de llenar correctamente los campos solicitados."))
 			self.path.SetFocus() if self.path.GetValue() == "" else self.identifier.SetFocus() if self.identifier.GetValue() == "" else None
 			return
@@ -97,9 +105,11 @@ class pathsDialog(wx.Dialog):
 			result = self.data._saveInfo() #Se almacena el valor devuelto por _saveInfo (método explicado más adelante).
 			if result: #Si es True se emite un tono y un mensaje confirmando esta operación.
 				tones.beep(432, 300)
+				#Translators: Message to indicate that the operation was successful and the path added to the list.
 				ui.message(_("Ruta añadida correctamente."))
 
 		else: #Si la operación anterior falla se emite un mensaje para advertir al usuario.
+			#Translators: Message to indicate that the operation failed because the path doesn't exists, is misspelled or the identifier already exists.
 			ui.message(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."))
 
 		if self.IsModal(): #Si el diálogo es modal, es decir, bloquea la interacción con otras interfaces cerrarlo y establecer su valor de retorno en 0.
@@ -215,8 +225,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		return None #Si no hay ningún marcador se devuelve None.
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
+	#Translators: The function of the command is described, which is to open the dialog to enter the required data and thus add it to the list.
 	@script(
-		description="Abre un cuadro de texto para ingresar nuevas rutas a añadir a la lista de rutas favoritas",
+		description=_("Abre el diálogo para ingresar nuevas rutas a añadir a la lista de favoritas"),
 		gesture="kb:alt+NVDA+a",
 	)
 	def script_addNewPath(self, gesture):
@@ -231,8 +242,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			gui.mainFrame.postPopup()
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
+	#Translators: The function of the command is described, which is to open the selected route or delete it from the list if the command is pressed twice quickly.
 	@script(
-		description="Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la lista de rutas favoritas",
+		description=_("Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+l",
 	)
 	def script_launchOrDeletePath(self, gesture):
@@ -240,10 +252,12 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método para ejecutar la acción de lanzar o eliminar la ruta seleccionada en el menú virtual.
 		"""
 		if self.empty: #Si no hay ninguna ruta guardada, se lanza un mensaje de error y se detiene la ejecución de la función.
+			#Translators: Error message to indicate that there are no saved paths in the list.
 			ui.message(_("¡No hay rutas guardadas!"))
 			return
 
 		if not os.path.exists(self.paths['path'][self.counter]): #Si la ruta a verificar no existe se lanza un mensaje de error y se elimina del diccionario.
+			#Translators: Error message to indicate that the path doesn't exists or is misspelled.
 			ui.message(_("La ruta guardada no existe o está mal escrita."))
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
@@ -261,6 +275,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		else: #Si la diferencia es menor, se elimina ese elemento y se lanza un mensaje para indicárselo al usuario.
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
+			#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
 			ui.message(_("Ruta eliminada correctamente de la lista."))
 			self._saveInfo()
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
@@ -269,8 +284,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		self.lastPressTime = currentTime #Se almacena el último momento en que se presionó la combinación de teclas.
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
+	#Translators: The function of the command is described, which is to navigate to the previous item in the paths list.
 	@script(
-		description="Va al elemento anterior en la lista de rutas favoritas",
+		description=_("Va al elemento anterior en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+j"
 	)
 	def script_previousPath(self, gesture):
@@ -278,6 +294,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método que hace la acción de ir hacia atrás en el menú virtual.
 		"""
 		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
+			#Translators: Error message to indicate that there are no saved paths in the list.
 			ui.message(_("¡No hay rutas guardadas!"))
 
 		else: #Si el resultado de la condición es lo contrario, recorre el contador en 1 hacia atrás y lo verbaliza, no sin antes verificar si este es menor a 0, para si es así, recorrerse hasta el final.
@@ -285,11 +302,12 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if self.counter < 0:
 				self.counter = len(self.paths['path'])-1
 
-			ui.message(f"{self.paths['identifier'][self.counter]} {self.counter+1} de {len(self.paths['path'])}")
+			ui.message(_("{} {} de {}").format(self.paths['identifier'][self.counter], self.counter+1, len(self.paths['path'])))
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
+	#Translators: The function of the command is described, which is to navigate to the next item in the paths list.
 	@script(
-		description="Va al siguiente elemento en la lista de rutas favoritas",
+		description=_("Va al siguiente elemento en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+k"
 	)
 	def script_nextPath(self, gesture):
@@ -297,6 +315,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método que hace la acción de ir hacia adelante en el menú virtual.
 		"""
 		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
+			#Translators: Error message to indicate that there are no saved paths in the list.
 			ui.message(_("¡No hay rutas guardadas!"))
 
 		else: #Si el resultado de la condición es lo contrario, recorre el contador en 1 hacia adelante y lo verbaliza, no sin antes verificar si este excede la longitud de elementos guardados, para si es así, volver a la posición original.
@@ -304,4 +323,4 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if self.counter > len(self.paths['path'])-1:
 				self.counter = 0
 
-			ui.message(f"{self.paths['identifier'][self.counter]} {self.counter+1} de {len(self.paths['path'])}")
+			ui.message(_("{} {} de {}").format(self.paths['identifier'][self.counter], self.counter+1, len(self.paths['path'])))

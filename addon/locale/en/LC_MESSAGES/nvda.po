@@ -1,0 +1,136 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the 'Rutas_fav' package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 'Rutas_fav' '1.0'\n"
+"Report-Msgid-Bugs-To: 'nvda-translations@groups.io'\n"
+"POT-Creation-Date: 2024-04-30 22:39-0600\n"
+"PO-Revision-Date: 2024-04-30 22:41-0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+
+#: addon\globalPlugins\rutas_fav.py:33
+msgid "Ingresar ruta"
+msgstr "Add path"
+
+#. Se crean los cuadros de texto junto con su etiqueta, para de esta forma añadirlos más adelante.
+#. Translators: Label for the text area in which the absolute path will be entered using markers if these are available.
+#: addon\globalPlugins\rutas_fav.py:43
+msgid ""
+"&Ruta absoluta que desee guardar (usar marcadores si están disponibles):"
+msgstr "Absolute &path you want to save (use markers if available):"
+
+#. Translators: Label for the text area where a common name will be written to identify the saved path.
+#: addon\globalPlugins\rutas_fav.py:47
+msgid "&Identificador de la ruta (nombre a mostrar en el menú virtual):"
+msgstr "Path &identifier (name to display in the virtual menu):"
+
+#. Se crean los botones junto con su respectiva vinculación a un método de evento que ejecutará ciertas acciones en base a si son pulsados.
+#. Translators: It is the accept button to confirm the data entered.
+#: addon\globalPlugins\rutas_fav.py:52
+msgid "&Aceptar"
+msgstr "&Ok"
+
+#. Translators: It is the cancel button to cancel the process and close the dialog.
+#: addon\globalPlugins\rutas_fav.py:56
+msgid "Cancelar"
+msgstr "Cancel"
+
+#. Translators: It is the web button to open the developer website in the browser.
+#: addon\globalPlugins\rutas_fav.py:60
+msgid "&Visitar la web del desarrollador"
+msgstr "Go to developer &website"
+
+#. Se verifica si no existe contenido en cualquiera de los dos campos de texto no para luego lanzar un mensaje de advertencia y enfocar el cuadro correspondiente.
+#. Translators: Message to indicate that the operation failed because one or both of the text areas are empty.
+#: addon\globalPlugins\rutas_fav.py:91
+msgid "Asegúrese de llenar correctamente los campos solicitados."
+msgstr "Make sure you fill out the requested fields correctly."
+
+#. Translators: Message to indicate that the operation was successful and the path added to the list.
+#: addon\globalPlugins\rutas_fav.py:109
+msgid "Ruta añadida correctamente."
+msgstr "Path added successfully."
+
+#. Si la operación anterior falla se emite un mensaje para advertir al usuario.
+#. Translators: Message to indicate that the operation failed because the path doesn't exists, is misspelled or the identifier already exists.
+#: addon\globalPlugins\rutas_fav.py:113
+msgid ""
+"Imposible añadir la ruta a la lista, favor de escribir correctamente la "
+"misma o verificar si su identificador no es igual al de uno ya existente."
+msgstr ""
+"Impossible to add the path to the list, please write it correctly or check "
+"if its identifier is not the same as an existing one."
+
+#: addon\globalPlugins\rutas_fav.py:230
+msgid ""
+"Abre el diálogo para ingresar nuevas rutas a añadir a la lista de favoritas"
+msgstr "Open the dialog to enter new routes to add to the favorites list"
+
+#: addon\globalPlugins\rutas_fav.py:247
+msgid ""
+"Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la "
+"lista de rutas favoritas"
+msgstr ""
+"Open or delete (if pressed twice quickly) the selected item in the favorite "
+"paths list"
+
+#. Si no hay ninguna ruta guardada, se lanza un mensaje de error y se detiene la ejecución de la función.
+#. Translators: Error message to indicate that there are no saved paths in the list.
+#. Si no hay rutas guardadas se lanza un mensaje de error.
+#. Translators: Error message to indicate that there are no saved paths in the list.
+#: addon\globalPlugins\rutas_fav.py:256 addon\globalPlugins\rutas_fav.py:298
+#: addon\globalPlugins\rutas_fav.py:319
+msgid "¡No hay rutas guardadas!"
+msgstr "There are no saved paths!"
+
+#. Si la ruta a verificar no existe se lanza un mensaje de error y se elimina del diccionario.
+#. Translators: Error message to indicate that the path doesn't exists or is misspelled.
+#: addon\globalPlugins\rutas_fav.py:261
+msgid "La ruta guardada no existe o está mal escrita."
+msgstr "The saved path does not exist or is misspelled."
+
+#. Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
+#: addon\globalPlugins\rutas_fav.py:279
+msgid "Ruta eliminada correctamente de la lista."
+msgstr "Path deleted successfully."
+
+#: addon\globalPlugins\rutas_fav.py:289
+msgid "Va al elemento anterior en la lista de rutas favoritas"
+msgstr "Go to previous item in the favorite paths list"
+
+#: addon\globalPlugins\rutas_fav.py:305 addon\globalPlugins\rutas_fav.py:326
+msgid "{} {} de {}"
+msgstr "{} {} of {}"
+
+#: addon\globalPlugins\rutas_fav.py:310
+msgid "Va al siguiente elemento en la lista de rutas favoritas"
+msgstr "Go to next item in the favorite paths list"
+
+#. add-on Name/identifier, internal for NVDA
+#. Add-on summary, usually the user visible name of the addon.
+#. Translators: Summary for this add-on
+#. to be shown on installation and add-on information found in Add-ons Manager.
+#: buildVars.py:19 buildVars.py:23
+msgid "Rutas_fav"
+msgstr "Fav_paths"
+
+#. Add-on description
+#. Translators: Long description to be shown for this add-on on add-on information from add-ons manager
+#: buildVars.py:26
+msgid ""
+"Este addon tiene como finalidad el tener una gestión simple pero eficaz de "
+"rutas favoritas para así, en determinados casos, abrir estas rutas "
+"rápidamente"
+msgstr ""
+"The purpose of this addon is to have a simple but effective management of "
+"favorite paths in order to, in certain cases, open these paths quickly."
