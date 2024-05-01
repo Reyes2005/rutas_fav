@@ -188,10 +188,11 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		except FileNotFoundError: #Excepción para controlar el error provocado por si el archivo no existe.
 			#no se hace nada, solo se usan los valores por defecto.
 			pass
+
 		except json.JSONDecodeError:
 			#se hace una excepción en caso de que la lectura/decodificación de algún objeto JSON no pueda ser llevada a cabo. se usan los valores por defecto
-			ui.message(_("error en la decodificación de json. se usarán los valores por defecto.")) #se le avisa del error al usuario.
-			paths = {"path": [], "identifier": []}
+			#Translators: The user is notified that the configuration file could not be loaded correctly due to some data decoding error.
+			ui.message(_("error en la decodificación de json. se usarán los valores por defecto."))
 		return paths #Se devuelve el diccionario, sea con las claves inicializadas en vacío o con el contenido del json.
 
 	def _saveInfo(self):
@@ -204,13 +205,13 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			with open(filename, "w") as f: #Se abre un bloque de este tipo para abrir el archivo con un un manejador y cerrarlo al finalizar su contenido.
 				json.dump(self.paths, f) #Se guarda el contenido del diccionario paths (rutas e identificadores) en un archivo json.
 				return True #Se devuelve True por fines de control si la operación es exitosa.
-		except IOError as e:
-			#manejo de errores de entrada/salida general, que podría incluir errores de escritura. se añade el manejador "e" para poder devolver el error al usuario.
-			ui.message(_("Error al guardar las rutas") + str(e)) #se le muestra el error al usuario usando ui
+		except IOError as e: #manejo de errores de entrada/salida general, que podría incluir errores de escritura. se añade el manejador "e" para poder devolver el error al usuario.
+			#Translators: An error message is displayed if the content cannot be saved to the file.
+			ui.message(_("Error al guardar las rutas: {}").format(str(e))) #se le muestra el error al usuario usando ui
 			return False  #se retorna falso por motivos de control
-		except TypeError as e:
-			#este error ocurre si algún objeto dentro de "self.pats" no es serializable a JSON
-			ui.message(_("error en la serialización de datos, hay datos no soportados para guardar en el formato JSON: ") + str(e)) # mostramos el error al usuario.
+		except TypeError: #este error ocurre si algún objeto dentro de "self.pats" no es serializable a JSON
+			#Translators: The user is notified that the configuration file could not be saved correctly due to some data encoding error.
+			ui.message(_("error en la serialización de datos, hay datos no soportados para guardar en el formato JSON.") # mostramos el error al usuario.
 			return False #Se devuelve False por fines de control si la operación falla.
 
 	def checkPath(self, path):
