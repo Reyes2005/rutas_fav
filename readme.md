@@ -1,6 +1,6 @@
 # Rutas fav
 ## ¿Qué es?
-**Rutas fav** es un complemento para el lector de pantallas NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario, pudiendo lanzarlas, eliminarlas o añadir nuevas de manera sencilla e intuitiva para el usuario.
+**Rutas fav** es un complemento para el lector de pantalla NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario, pudiendo lanzarlas, eliminarlas o añadir nuevas de manera sencilla e intuitiva para el usuario.
 ### ¿Cómo funciona?
 Los comandos para utilizar las funciones descritas anteriormente se describen a continuación:
 * NVDA+ALT+A: Se lanza un diálogo para ingresar los datos requeridos, tales como ruta absoluta e identificador para mostrarse en el menú virtual.
