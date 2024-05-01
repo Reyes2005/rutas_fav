@@ -229,6 +229,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	@script(
 		description=_("Abre el diálogo para ingresar nuevas rutas a añadir a la lista de favoritas"),
 		gesture="kb:alt+NVDA+a",
+		category = _("Fav paths")
 	)
 	def script_addNewPath(self, gesture):
 		"""
@@ -246,6 +247,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	@script(
 		description=_("Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+l",
+		category = _("Fav paths")
 	)
 	def script_launchOrDeletePath(self, gesture):
 		"""
@@ -287,7 +289,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	#Translators: The function of the command is described, which is to navigate to the previous item in the paths list.
 	@script(
 		description=_("Va al elemento anterior en la lista de rutas favoritas"),
-		gesture="kb:alt+NVDA+j"
+		gesture="kb:alt+NVDA+j",
+		category = _("Fav paths")
 	)
 	def script_previousPath(self, gesture):
 		"""
@@ -308,7 +311,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	#Translators: The function of the command is described, which is to navigate to the next item in the paths list.
 	@script(
 		description=_("Va al siguiente elemento en la lista de rutas favoritas"),
-		gesture="kb:alt+NVDA+k"
+		gesture="kb:alt+NVDA+k",
+		category = _("Fav paths")
 	)
 	def script_nextPath(self, gesture):
 		"""
