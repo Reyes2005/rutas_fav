@@ -1,3 +1,4 @@
+[readme.md](https://github.com/Reyes2005/rutas_fav/files/15173570/readme.md)
 #Rutas fav
 ##¿Qué es?
 **Rutas fav** es un complemento para el lector de pantallas NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario, pudiendo lanzarlas, eliminarlas o añadir nuevas de manera sencilla e intuitiva para el usuario.
