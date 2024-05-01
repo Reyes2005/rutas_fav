@@ -49,17 +49,14 @@ class pathsDialog(wx.Dialog):
 
 		#Se crean los botones junto con su respectiva vinculación a un método de evento que ejecutará ciertas acciones en base a si son pulsados.
 		#Translators: It is the accept button to confirm the data entered.
-		self.acceptBTN = wx.Button(self.Panel, 0, label=_("&Aceptar"))
-		self.Bind(wx.EVT_BUTTON, self.onAccept, id=self.acceptBTN.GetId())
-
+		self.acceptBTN = wx.Button(self.Panel, label=_("&Aceptar"))
+		self.acceptBTN.Bind(wx.EVT_BUTTON, self.onAccept)
 		#Translators: It is the cancel button to cancel the process and close the dialog.
-		self.cancelBTN = wx.Button(self.Panel, 1, label=_("Cancelar"))
-		self.Bind(wx.EVT_BUTTON, self.onCancel, id=self.cancelBTN.GetId())
-
+		self.cancelBTN = wx.Button(self.Panel, label=_("Cancelar"))
+		self.cancelBTN.Bind(wx.EVT_BUTTON, self.onCancel)
 		#Translators: It is the web button to open the developer website in the browser.
-		self.webBTN = wx.Button(self.Panel, 2, label=_("&Visitar la web del desarrollador"))
-		self.Bind(wx.EVT_BUTTON, self.onWeb, id=self.webBTN.GetId())
-
+		self.webBTN = wx.Button(self.Panel, label=_("&Visitar la web del desarrollador"))
+		self.webBTN.Bind(wx.EVT_BUTTON, self.onWeb)
 		#Se hace una vinculación hacia un método de evento para controlar teclas en la ventana.
 		self.Bind(wx.EVT_CHAR_HOOK, self.onkeyWindowDialog)
 
@@ -189,8 +186,12 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				paths = json.load(f) #Se carga el contenido del archivo json en el diccionario declarado arriba.
 
 		except FileNotFoundError: #Excepción para controlar el error provocado por si el archivo no existe.
+			#no se hace nada, solo se usan los valores por defecto.
+			pass
+		except json.JSONDecodeError:
+			#se hace una excepción en caso de que la lectura/decodificación de algún objeto JSON no pueda ser llevada a cabo. se usan los valores por defecto
+			ui.message(_("error en la decodificación de json. se usarán los valores por defecto.")) #se le avisa del error al usuario.
 			paths = {"path": [], "identifier": []}
-
 		return paths #Se devuelve el diccionario, sea con las claves inicializadas en vacío o con el contenido del json.
 
 	def _saveInfo(self):
@@ -198,10 +199,19 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método de guardado de las rutas y sus identificadores respectivos en un archivo json.
 		"""
 		filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json") #Se crea la variable donde se espera que esté el archivo de configuración.
-		with open(filename, "w") as f: #Se abre un bloque de este tipo para abrir el archivo con un un manejador y cerrarlo al finalizar su contenido.
-			json.dump(self.paths, f) #Se guarda el contenido del diccionario paths (rutas e identificadores) en un archivo json.
-			return True #Se devuelve True por fines de control si la operación es exitosa.
-		return False #Se devuelve False por fines de control si la operación falla.
+#se añade un bloque try para poder manejar algunos errores con el json. es importante sobre todo si los archivos json pueden ser accedidos (por error o no) por el usuario.
+		try:
+			with open(filename, "w") as f: #Se abre un bloque de este tipo para abrir el archivo con un un manejador y cerrarlo al finalizar su contenido.
+				json.dump(self.paths, f) #Se guarda el contenido del diccionario paths (rutas e identificadores) en un archivo json.
+				return True #Se devuelve True por fines de control si la operación es exitosa.
+		except IOError as e:
+			#manejo de errores de entrada/salida general, que podría incluir errores de escritura. se añade el manejador "e" para poder devolver el error al usuario.
+			ui.message(_("Error al guardar las rutas") + str(e)) #se le muestra el error al usuario usando ui
+			return False  #se retorna falso por motivos de control
+		except TypeError as e:
+			#este error ocurre si algún objeto dentro de "self.pats" no es serializable a JSON
+			ui.message(_("error en la serialización de datos, hay datos no soportados para guardar en el formato JSON: ") + str(e)) # mostramos el error al usuario.
+			return False #Se devuelve False por fines de control si la operación falla.
 
 	def checkPath(self, path):
 		"""
