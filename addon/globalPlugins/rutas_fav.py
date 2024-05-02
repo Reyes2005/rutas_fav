@@ -155,7 +155,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	"""
 	Clase que hereda de globalPluginHandler.GlobalPlugin para hacer los scripts relacionados a cada combinación de teclas pulsada, así como otras operaciones lógicas para el funcionamiento del addon.
 	"""
-	scriptCategory = _("Fav paths")
+	scriptCategory = _("Rutas fav")
 	def __init__(self):
 		"""
 		Método de inicialización de la clase donde se inicializan valores tanto para la clase padre como para la clase hija (la actual).

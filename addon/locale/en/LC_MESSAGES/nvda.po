@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 'Rutas_fav' '1.0'\n"
 "Report-Msgid-Bugs-To: 'nvda-translations@groups.io'\n"
-"POT-Creation-Date: 2024-04-30 22:39-0600\n"
-"PO-Revision-Date: 2024-04-30 22:41-0600\n"
+"POT-Creation-Date: 2024-05-02 17:13-0600\n"
+"PO-Revision-Date: 2024-05-02 17:15-0600\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -41,29 +41,29 @@ msgid "&Aceptar"
 msgstr "&Ok"
 
 #. Translators: It is the cancel button to cancel the process and close the dialog.
-#: addon\globalPlugins\rutas_fav.py:56
+#: addon\globalPlugins\rutas_fav.py:55
 msgid "Cancelar"
 msgstr "Cancel"
 
 #. Translators: It is the web button to open the developer website in the browser.
-#: addon\globalPlugins\rutas_fav.py:60
+#: addon\globalPlugins\rutas_fav.py:58
 msgid "&Visitar la web del desarrollador"
 msgstr "Go to developer &website"
 
 #. Se verifica si no existe contenido en cualquiera de los dos campos de texto no para luego lanzar un mensaje de advertencia y enfocar el cuadro correspondiente.
 #. Translators: Message to indicate that the operation failed because one or both of the text areas are empty.
-#: addon\globalPlugins\rutas_fav.py:91
+#: addon\globalPlugins\rutas_fav.py:88
 msgid "Asegúrese de llenar correctamente los campos solicitados."
 msgstr "Make sure you fill out the requested fields correctly."
 
 #. Translators: Message to indicate that the operation was successful and the path added to the list.
-#: addon\globalPlugins\rutas_fav.py:109
+#: addon\globalPlugins\rutas_fav.py:106
 msgid "Ruta añadida correctamente."
 msgstr "Path added successfully."
 
 #. Si la operación anterior falla se emite un mensaje para advertir al usuario.
 #. Translators: Message to indicate that the operation failed because the path doesn't exists, is misspelled or the identifier already exists.
-#: addon\globalPlugins\rutas_fav.py:113
+#: addon\globalPlugins\rutas_fav.py:110
 msgid ""
 "Imposible añadir la ruta a la lista, favor de escribir correctamente la "
 "misma o verificar si su identificador no es igual al de uno ya existente."
@@ -71,12 +71,43 @@ msgstr ""
 "Impossible to add the path to the list, please write it correctly or check "
 "if its identifier is not the same as an existing one."
 
-#: addon\globalPlugins\rutas_fav.py:230
+#: addon\globalPlugins\rutas_fav.py:158
+msgid "Rutas fav"
+msgstr "Fav paths"
+
+#. se hace una excepción en caso de que la lectura/decodificación de algún objeto JSON no pueda ser llevada a cabo. se usan los valores por defecto
+#. Translators: The user is notified that the configuration file could not be loaded correctly due to some data decoding error.
+#: addon\globalPlugins\rutas_fav.py:197
+msgid "error en la decodificación de json. se usarán los valores por defecto."
+msgstr "json decoding error. The default values will be used."
+
+#. Se abre un bloque de este tipo para abrir el archivo con un un manejador y cerrarlo al finalizar su contenido.
+#. Se guarda el contenido del diccionario paths (rutas e identificadores) en un archivo json.
+#. Se devuelve True por fines de control si la operación es exitosa.
+#. manejo de errores de entrada/salida general, que podría incluir errores de escritura. se añade el manejador "e" para poder devolver el error al usuario.
+#. Translators: An error message is displayed if the content cannot be saved to the file.
+#: addon\globalPlugins\rutas_fav.py:212
+msgid "Error al guardar las rutas: {}"
+msgstr "Error saving paths: {}"
+
+#. se le muestra el error al usuario usando ui
+#. se retorna falso por motivos de control
+#. este error ocurre si algún objeto dentro de "self.pats" no es serializable a JSON
+#. Translators: The user is notified that the configuration file could not be saved correctly due to some data encoding error.
+#: addon\globalPlugins\rutas_fav.py:216
+msgid ""
+"error en la serialización de datos, hay datos no soportados para guardar en "
+"el formato JSON."
+msgstr ""
+"error in data serialization, there is unsupported data to save in JSON "
+"format."
+
+#: addon\globalPlugins\rutas_fav.py:243
 msgid ""
 "Abre el diálogo para ingresar nuevas rutas a añadir a la lista de favoritas"
 msgstr "Open the dialog to enter new routes to add to the favorites list"
 
-#: addon\globalPlugins\rutas_fav.py:247
+#: addon\globalPlugins\rutas_fav.py:260
 msgid ""
 "Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la "
 "lista de rutas favoritas"
@@ -88,31 +119,31 @@ msgstr ""
 #. Translators: Error message to indicate that there are no saved paths in the list.
 #. Si no hay rutas guardadas se lanza un mensaje de error.
 #. Translators: Error message to indicate that there are no saved paths in the list.
-#: addon\globalPlugins\rutas_fav.py:256 addon\globalPlugins\rutas_fav.py:298
-#: addon\globalPlugins\rutas_fav.py:319
+#: addon\globalPlugins\rutas_fav.py:269 addon\globalPlugins\rutas_fav.py:313
+#: addon\globalPlugins\rutas_fav.py:334
 msgid "¡No hay rutas guardadas!"
 msgstr "There are no saved paths!"
 
 #. Si la ruta a verificar no existe se lanza un mensaje de error y se elimina del diccionario.
 #. Translators: Error message to indicate that the path doesn't exists or is misspelled.
-#: addon\globalPlugins\rutas_fav.py:261
+#: addon\globalPlugins\rutas_fav.py:274
 msgid "La ruta guardada no existe o está mal escrita."
 msgstr "The saved path does not exist or is misspelled."
 
 #. Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
-#: addon\globalPlugins\rutas_fav.py:279
+#: addon\globalPlugins\rutas_fav.py:290
 msgid "Ruta eliminada correctamente de la lista."
 msgstr "Path deleted successfully."
 
-#: addon\globalPlugins\rutas_fav.py:289
+#: addon\globalPlugins\rutas_fav.py:304
 msgid "Va al elemento anterior en la lista de rutas favoritas"
 msgstr "Go to previous item in the favorite paths list"
 
-#: addon\globalPlugins\rutas_fav.py:305 addon\globalPlugins\rutas_fav.py:326
+#: addon\globalPlugins\rutas_fav.py:320 addon\globalPlugins\rutas_fav.py:341
 msgid "{} {} de {}"
 msgstr "{} {} of {}"
 
-#: addon\globalPlugins\rutas_fav.py:310
+#: addon\globalPlugins\rutas_fav.py:325
 msgid "Va al siguiente elemento en la lista de rutas favoritas"
 msgstr "Go to next item in the favorite paths list"
 
