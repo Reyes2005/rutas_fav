@@ -281,9 +281,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
-		currentTime = time.time()
-		self.doublePress = (currentTime - self.lastPressTime) <= 0.5
-		if self.doublePress:
+		currentTime = time.time() #Se establece el tiempo actual en la variable para fines de control.
+		self.doublePress = (currentTime - self.lastPressTime) <= 0.5 #Si la diferencia entre el tiempo actual y el último momento en el que se presionó la combinación es menor o igual a medio segundo, la variable se establece en True, de lo contrario se establece en False.
+		if self.doublePress: #Si la variable anterior es verdadera, se elimina la ruta junto con su identificador, informando al usuario por medio de un mensaje y guardando la información.
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
 			#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
@@ -292,10 +292,10 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
-		else:
+		else: #Si la variable doublePress es False (si se pulsa solo una vez el comando) se ejecuta la ruta.
 			os.startfile(self.paths['path'][self.counter])
 
-		self.doublePress = False
+		self.doublePress = False #Se devuelve la variable a su estado original.
 		self.lastPressTime = currentTime #Se almacena el último momento en que se presionó la combinación de teclas.
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
