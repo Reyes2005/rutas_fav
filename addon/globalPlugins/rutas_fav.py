@@ -155,6 +155,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	"""
 	Clase que hereda de globalPluginHandler.GlobalPlugin para hacer los scripts relacionados a cada combinación de teclas pulsada, así como otras operaciones lógicas para el funcionamiento del addon.
 	"""
+	scriptCategory = _("Fav paths")
 	def __init__(self):
 		"""
 		Método de inicialización de la clase donde se inicializan valores tanto para la clase padre como para la clase hija (la actual).
@@ -211,7 +212,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			return False  #se retorna falso por motivos de control
 		except TypeError: #este error ocurre si algún objeto dentro de "self.pats" no es serializable a JSON
 			#Translators: The user is notified that the configuration file could not be saved correctly due to some data encoding error.
-			ui.message(_("error en la serialización de datos, hay datos no soportados para guardar en el formato JSON.") # mostramos el error al usuario.
+			ui.message(_("error en la serialización de datos, hay datos no soportados para guardar en el formato JSON.")) # mostramos el error al usuario.
 			return False #Se devuelve False por fines de control si la operación falla.
 
 	def checkPath(self, path):
@@ -239,8 +240,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	#Translators: The function of the command is described, which is to open the dialog to enter the required data and thus add it to the list.
 	@script(
 		description=_("Abre el diálogo para ingresar nuevas rutas a añadir a la lista de favoritas"),
-		gesture="kb:alt+NVDA+a",
-		category = _("Fav paths")
+		gesture="kb:alt+NVDA+a"
 	)
 	def script_addNewPath(self, gesture):
 		"""
@@ -257,8 +257,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	#Translators: The function of the command is described, which is to open the selected route or delete it from the list if the command is pressed twice quickly.
 	@script(
 		description=_("Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la lista de rutas favoritas"),
-		gesture="kb:alt+NVDA+l",
-		category = _("Fav paths")
+		gesture="kb:alt+NVDA+l"
 	)
 	def script_launchOrDeletePath(self, gesture):
 		"""
@@ -300,8 +299,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	#Translators: The function of the command is described, which is to navigate to the previous item in the paths list.
 	@script(
 		description=_("Va al elemento anterior en la lista de rutas favoritas"),
-		gesture="kb:alt+NVDA+j",
-		category = _("Fav paths")
+		gesture="kb:alt+NVDA+j"
 	)
 	def script_previousPath(self, gesture):
 		"""
@@ -322,8 +320,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	#Translators: The function of the command is described, which is to navigate to the next item in the paths list.
 	@script(
 		description=_("Va al siguiente elemento en la lista de rutas favoritas"),
-		gesture="kb:alt+NVDA+k",
-		category = _("Fav paths")
+		gesture="kb:alt+NVDA+k"
 	)
 	def script_nextPath(self, gesture):
 		"""
