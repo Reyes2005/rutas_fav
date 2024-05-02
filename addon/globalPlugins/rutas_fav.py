@@ -167,6 +167,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		self.counter = -1
 		self.empty = not self.paths['path']
 		self.lastPressTime = 0
+		self.doublePress = False
 		self.markers = {
 			"$users": os.path.expanduser('~'),
 			"$desktop": os.path.join(os.path.expanduser('~'), "Desktop"),
@@ -280,11 +281,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
-		currentTime = time.time() #Se almacena el tiempo actual.
-		if (currentTime - self.lastPressTime) > 0.5: #Si la diferencia entre el tiempo actual y el último momento en que se presionó la combinación de teclas es mayor a 500 ms, se abre la ruta.
-			os.startfile(self.paths['path'][self.counter])
-
-		else: #Si la diferencia es menor, se elimina ese elemento y se lanza un mensaje para indicárselo al usuario.
+		currentTime = time.time()
+		self.doublePress = (currentTime - self.lastPressTime) <= 0.5
+		if self.doublePress:
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
 			#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
@@ -293,6 +292,10 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
+		else:
+			os.startfile(self.paths['path'][self.counter])
+
+		self.doublePress = False
 		self.lastPressTime = currentTime #Se almacena el último momento en que se presionó la combinación de teclas.
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
