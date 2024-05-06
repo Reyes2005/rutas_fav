@@ -25,7 +25,7 @@ addon_info = {
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("Este addon tiene como finalidad el tener una gestión simple pero eficaz de rutas favoritas para así, en determinados casos, abrir estas rutas rápidamente"),
 	# version
-	"addon_version": "1.0",
+	"addon_version": "1.0.1",
 	# Author(s)
 	"addon_author": "Ángel Reyes <angeldelosreyesfaz@gmail.com>",
 	# URL for the add-on documentation support
