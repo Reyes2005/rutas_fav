@@ -4,7 +4,7 @@
 
 **Rutas fav** es un complemento para el lector de pantalla NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario, pudiendo lanzarlas, eliminarlas o añadir nuevas de manera sencilla e intuitiva para el mismo.
 
-### ¿Cómo funciona?
+## ¿Cómo funciona?
 Los comandos para utilizar las funciones descritas anteriormente se describen a continuación (modificables a través del apartado gestos de entrada bajo la categoría Fav paths):
 
 * NVDA+ALT+A: Se lanza un diálogo para ingresar los datos requeridos, tales como ruta absoluta e identificador para mostrarse en el menú virtual.
@@ -12,7 +12,7 @@ Los comandos para utilizar las funciones descritas anteriormente se describen a 
 * NVDA+ALT+K: Se navega hacia el elemento siguiente en la lista de rutas guardadas.
 * NVDA+ALT+L: Si se presiona una vez se abre la ruta seleccionada, si se presiona 2 veces rápidamente esta se abre y se elimina de la lista.
 
-#### ¿Qué son los marcadores?
+## ¿Qué son los marcadores?
 
 Los marcadores son algunas palabras clave con el signo de dólar ($) al principio de estas, las cuales definen rutas predeterminadas de la computadora para acceder más rápidamente a las mismas. Están disponibles:
 
