@@ -30,6 +30,7 @@ class pathsDialog(wx.Dialog):
 		"""
 		Método de inicialización donde se creará toda la interfaz y se vincularán eventos y demás.
 		"""
+		#Translators: Title that will be displayed when the dialog appears.
 		super(pathsDialog, self).__init__(None, -1, title=_("Ingresar ruta")) #Se inicializa la clase padre para establecer el título del diálogo.
 
 		self.data = data #Se crea una referencia local hacia el objeto de globalPlugin creado más adelante, este es pasado en uno de los parámetros en el constructor.
@@ -110,7 +111,7 @@ class pathsDialog(wx.Dialog):
 			ui.message(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."))
 
 		if self.IsModal(): #Si el diálogo es modal, es decir, bloquea la interacción con otras interfaces cerrarlo y establecer su valor de retorno en 0.
-			self.EndModal(0)
+			self.EndModal(wx.ID_CANCEL)
 
 		else: #Si esto no ocurre, se cierra de todas formas.
 			self.Close()
@@ -127,7 +128,7 @@ class pathsDialog(wx.Dialog):
 		"""
 		if event.GetKeyCode() == 27: #Si se presiona la tecla ESC se cierra la ventana.
 			if self.IsModal():
-				self.EndModal(1)
+				self.EndModal(wx.ID_CANCEL)
 			else:
 				self.Close()
 		else: #Si la condición anterior no se cumple, se omite el evento interno del diálogo.
@@ -138,7 +139,7 @@ class pathsDialog(wx.Dialog):
 		Método que responde al evento de pulsar el botón cancelar.
 		"""
 		if self.IsModal(): #Si la ventana está abierta, se cierra.
-			self.EndModal(1)
+			self.EndModal(wx.ID_CANCEL)
 		else:
 			self.Close()
 
@@ -155,6 +156,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	"""
 	Clase que hereda de globalPluginHandler.GlobalPlugin para hacer los scripts relacionados a cada combinación de teclas pulsada, así como otras operaciones lógicas para el funcionamiento del addon.
 	"""
+	#Translators: name of the addon category that will appear in the input gestures section.
 	scriptCategory = _("Rutas fav")
 	def __init__(self):
 		"""
@@ -281,7 +283,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
-		currentTime = time.time() #Se establece el tiempo actual en la variable para fines de control.
+		currentTime = time.monotonic() #Se establece el tiempo actual en la variable para fines de control.
 		self.doublePress = (currentTime - self.lastPressTime) <= 0.5 #Si la diferencia entre el tiempo actual y el último momento en el que se presionó la combinación es menor o igual a medio segundo, la variable se establece en True, de lo contrario se establece en False.
 		if self.doublePress: #Si la variable anterior es verdadera, se elimina la ruta junto con su identificador, informando al usuario por medio de un mensaje y guardando la información.
 			del self.paths['path'][self.counter]
@@ -317,6 +319,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if self.counter < 0:
 				self.counter = len(self.paths['path'])-1
 
+			#Translators: Message to be spoken when the counter position changes, being composed of the identifier and the current position based on the number of routes inserted.
 			ui.message(_("{} {} de {}").format(self.paths['identifier'][self.counter], self.counter+1, len(self.paths['path'])))
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
@@ -338,4 +341,5 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if self.counter > len(self.paths['path'])-1:
 				self.counter = 0
 
+			#Translators: Message to be spoken when the counter position changes, being composed of the identifier and the current position based on the number of routes inserted.
 			ui.message(_("{} {} de {}").format(self.paths['identifier'][self.counter], self.counter+1, len(self.paths['path'])))
