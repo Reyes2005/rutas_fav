@@ -16,11 +16,10 @@ import globalVars
 import tones
 import addonHandler
 addonHandler.initTranslation()
-from scriptHandler import script
+from scriptHandler import script, getLastScriptRepeatCount
 #Importamos librerías externas a NVDA
 import os
 import json
-import time
 
 class pathsDialog(wx.Dialog):
 	"""
@@ -168,8 +167,6 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		self.paths = self._loadInfo()
 		self.counter = -1
 		self.empty = not self.paths['path']
-		self.lastPressTime = 0
-		self.doublePress = False
 		self.markers = {
 			"$users": os.path.expanduser('~'),
 			"$desktop": os.path.join(os.path.expanduser('~'), "Desktop"),
@@ -283,9 +280,11 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
-		currentTime = time.monotonic() #Se establece el tiempo actual en la variable para fines de control.
-		self.doublePress = (currentTime - self.lastPressTime) <= 0.5 #Si la diferencia entre el tiempo actual y el último momento en el que se presionó la combinación es menor o igual a medio segundo, la variable se establece en True, de lo contrario se establece en False.
-		if self.doublePress: #Si la variable anterior es verdadera, se elimina la ruta junto con su identificador, informando al usuario por medio de un mensaje y guardando la información.
+		pressCount = getLastScriptRepeatCount() # Se asigna a una variable de control las veces que se ha pulsado la combinación de teclas, asignando 0 si no se había pulsado y 1 si ya lo había hecho anteriormente.
+		if pressCount < 1: #Si el valor de la variable anteriormente mencionada es menor a 1 (no ha sido pulsada antes la combinación) se ejecuta la ruta seleccionada.
+			os.startfile(self.paths['path'][self.counter])
+
+		else: #De lo contrario, la ruta se elimina.
 			del self.paths['path'][self.counter]
 			del self.paths['identifier'][self.counter]
 			#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
@@ -293,12 +292,6 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			self._saveInfo()
 			if not self.paths['path'] and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
-
-		else: #Si la variable doublePress es False (si se pulsa solo una vez el comando) se ejecuta la ruta.
-			os.startfile(self.paths['path'][self.counter])
-
-		self.doublePress = False #Se devuelve la variable a su estado original.
-		self.lastPressTime = currentTime #Se almacena el último momento en que se presionó la combinación de teclas.
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
 	#Translators: The function of the command is described, which is to navigate to the previous item in the paths list.
