@@ -33,6 +33,10 @@ De la misma manera, si deseas realizar un donativo para que el desarrollo de est
 
 ## Changelog
 
+### v1.0.2
+Corrección de la anidación de encabezados en el readme
+Corrección de errores menores de código.
+
 ### v1.0.1
 
 Corrección de errores menores.
