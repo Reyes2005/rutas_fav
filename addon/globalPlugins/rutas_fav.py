@@ -14,6 +14,7 @@ import wx
 import gui
 import globalVars
 import tones
+import api
 import addonHandler
 addonHandler.initTranslation()
 from scriptHandler import script, getLastScriptRepeatCount
@@ -30,7 +31,7 @@ class pathsDialog(wx.Dialog):
 		Método de inicialización donde se creará toda la interfaz y se vincularán eventos y demás.
 		"""
 		#Translators: Title that will be displayed when the dialog appears.
-		super(pathsDialog, self).__init__(None, -1, title=_("Ingresar ruta")) #Se inicializa la clase padre para establecer el título del diálogo.
+		super(pathsDialog, self).__init__(None, -1, title=_("Rutas favoritas")) #Se inicializa la clase padre para establecer el título del diálogo.
 
 		self.data = data #Se crea una referencia local hacia el objeto de globalPlugin creado más adelante, este es pasado en uno de los parámetros en el constructor.
 
@@ -47,7 +48,14 @@ class pathsDialog(wx.Dialog):
 		label2 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Identificador de la ruta (nombre a mostrar en el menú virtual):"))
 		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY)
 
+		label3 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Rutas añadidas:"))
+		self.list = wx.ListCtrl(self.Panel, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_SORT_ASCENDING | wx.LC_VRULES | wx.LC_SINGLE_SEL)
+		self.list.Bind(wx.EVT_CONTEXT_MENU, self.onActions)
+
 		#Se crean los botones junto con su respectiva vinculación a un método de evento que ejecutará ciertas acciones en base a si son pulsados.
+
+		self.actionsBTN = wx.Button(self.Panel, label=_("Acciones"))
+		self.actionsBTN.Bind(wx.EVT_BUTTON, self.onActions)
 		#Translators: It is the accept button to confirm the data entered.
 		self.acceptBTN = wx.Button(self.Panel, label=_("&Aceptar"))
 		self.acceptBTN.Bind(wx.EVT_BUTTON, self.onAccept)
@@ -68,7 +76,10 @@ class pathsDialog(wx.Dialog):
 		sizeV.Add(self.path, 0, wx.EXPAND)
 		sizeV.Add(label2, 0, wx.EXPAND)
 		sizeV.Add(self.identifier, 0, wx.EXPAND)
+		sizeV.Add(label3, 0, wx.EXPAND)
+		sizeV.Add(self.list, 0, wx.EXPAND)
 
+		sizeH.Add(self.actionsBTN, 2, wx.EXPAND)
 		sizeH.Add(self.acceptBTN, 2, wx.EXPAND)
 		sizeH.Add(self.cancelBTN, 2, wx.EXPAND)
 		sizeH.Add(self.webBTN, 2, wx.EXPAND)
@@ -78,6 +89,22 @@ class pathsDialog(wx.Dialog):
 		#Se añaden estos contenedores (empaquetados en uno solo) al panel de la GUI, para luego centrar la ventana en la pantalla.
 		self.Panel.SetSizer(sizeV)
 		self.CenterOnScreen()
+
+	def onActions(self, event):
+		self.menu = wx.Menu()
+		item1 = self.menu.Append(1, _("Fijar ruta"))
+		item2 = self.menu.Append(2, _("Desfijar ruta"))
+		item3 = self.menu.Append(3, _("Eliminar ruta"))
+		item4 = self.menu.Append(4, _("Renombrar ruta"))
+		self.menu.Bind(wx.EVT_MENU, self.onMenu)
+		self.actionsBTN.PopupMenu(self.menu)
+
+	def onMenu(self, event):
+		if self.list.GetItemCount() == 0:
+			ui.message(_("No hay rutas guardadas."))
+			return
+
+		id = event.GetId()
 
 	def onAccept(self, event):
 		"""
@@ -194,6 +221,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			#se hace una excepción en caso de que la lectura/decodificación de algún objeto JSON no pueda ser llevada a cabo. se usan los valores por defecto
 			#Translators: The user is notified that the configuration file could not be loaded correctly due to some data decoding error.
 			ui.message(_("error en la decodificación de json. se usarán los valores por defecto."))
+
 		return paths #Se devuelve el diccionario, sea con las claves inicializadas en vacío o con el contenido del json.
 
 	def _saveInfo(self):
@@ -235,6 +263,23 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				return path
 
 		return None #Si no hay ningún marcador se devuelve None.
+
+	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
+	#Translators: The function of the command is described, which is to copy the full path of the current position in the virtual menu.
+	@script(
+		description=_("Copia la ruta completa correspondiente a la posición actual del menú virtual"),
+		gesture=None
+	)
+	def script_copyPath(self, gesture):
+		"""
+		Método que ejecuta la acción de copiar al portapapeles la ruta completa correspondiente a la posición actual del contador en el menú virtual.
+		"""
+		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
+			#Translators: Error message to indicate that there are no saved paths in the list.
+			ui.message(_("¡No hay rutas guardadas!"))
+			return
+
+		api.copyToClip(self.paths['path'][self.counter], True)
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
 	#Translators: The function of the command is described, which is to open the dialog to enter the required data and thus add it to the list.
