@@ -30,6 +30,11 @@ class pathsDialog(wx.Dialog):
 		label2 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Identificador de la ruta (nombre a mostrar en el menú virtual):"))
 		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY)
 
+		# Creamos el botón para permitir la selección de una ruta mediante el explorador de archivos.
+		#Translators: a button to open the file explorer, allowing you to select a path more intuitively
+		self.browseBTN = wx.Button(self.Panel, label=_("&Examinar..."))
+		self.browseBTN.Bind(wx.EVT_BUTTON, self.onBrowse)
+
 		label3 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Rutas añadidas:"))
 		self.list = wx.ListCtrl(self.Panel, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_SORT_ASCENDING | wx.LC_VRULES | wx.LC_SINGLE_SEL)
 		self.list.Bind(wx.EVT_CONTEXT_MENU, self.onActions)
@@ -87,6 +92,14 @@ class pathsDialog(wx.Dialog):
 			return
 
 		id = event.GetId()
+
+	def onBrowse(self, event):
+		with wx.DirDialog(self, _("Selecciona una carpeta"), style=wx.DD_DEFAULT_STYLE) as dialog:
+			if dialog.ShowModal() == wx.ID_OK:
+				# Se extrae la ruta de la carpeta para configurar el valor en el cuadro self.path
+				self.path.SetValue(dialog.GetPath())
+				# extraemos solamente el nombre de la ruta y lo configuramos en el cuadro identifier por default
+				self.identifier.SetValue(os.path.basename(dialog.GetPath()))
 
 	def onAccept(self, event):
 		"""
