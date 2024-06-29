@@ -1,4 +1,17 @@
-import sqlite3
+import sys
+import os
+dirAddon= os.path.dirname(__file__)
+sys.path.append(dirAddon)
+sys.path.append(os.path.join(dirAddon, "lib"))
+if sys.version.startswith("3.11"):
+    sys.path.append(os.path.join(dirAddon, "lib", "_311"))
+    from .lib._311 import sqlite3 
+    sqlite3.__path__.append(os.path.join(dirAddon, "lib", "_311", "sqlite3"))
+else:
+    sys.path.append(os.path.join(dirAddon, "lib", "_37"))
+    from .lib._37 import sqlite3
+    sqlite3.__path__.append(os.path.join(dirAddon, "lib", "_37", "sqlite3"))
+del sys.path[-3:]
 class database:
     def __init__(self, DBName):
         self.db = sqlite3.connect(DBName)

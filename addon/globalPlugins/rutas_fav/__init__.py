@@ -13,14 +13,15 @@ import ui
 import gui
 import globalVars
 import api
+import tones
 import addonHandler
 addonHandler.initTranslation()
 from scriptHandler import script, getLastScriptRepeatCount
 #Importamos librerías externas a NVDA
 import os
 import json
-import database
-from dialog import pathsDialog
+from . import database
+from .dialog import pathsDialog
 
 def disableInSecureMode(decoratedCls):
 	"""
@@ -57,19 +58,54 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			"$videos": os.path.join(os.path.expanduser('~'), "Videos"),
 			"$pictures": os.path.join(os.path.expanduser('~'), "Pictures")
 		}
-		self.load_info()
-		self.empty = not self.paths['path']
+		self._loadInfo()
+		self.empty = not self.paths
+		self.lastFixed = -1
+
+	def terminate(self):
+		self.db.commit()
+		self.db.close()
+
+	def fix(self, path, identifier):
+		idx = self.paths.index([path, identifier, 0])
+		try:
+			self.paths[idx][2] = 1
+			new = self.paths.pop(idx)
+			self.paths.insert((self.lastFixed+1), new)
+			self.lastFixed = self.paths.index(new)
+			self.db.execute("update paths set fixed=? where identifier=?", (1, identifier))
+			self.db.commit()
+			return True
+
+		except ValueError:
+			ui.message(_("No fue posible fijar la ruta."))
+			return False
+
+	def unfix(self, path, identifier):
+		idx = self.paths.index([path, identifier, 1])
+		try:
+			self.paths[idx][2] = 0
+			new = self.paths.pop(idx)
+			self.paths.append(new)
+			self.db.execute("update paths set fixed=? where identifier=?", (0, identifier))
+			self.db.commit()
+			return True
+
+		except ValueError:
+			ui.message(_("No fue posible desfijar la ruta."))
+			return False
 
 	def convertFormat(self):
 		filename = os.path.join(globalVars.appArgs.configPath, "rutas_fav.json") #Se crea la variable donde se espera que esté el archivo de configuración.
 		paths = {} #Diccionario vacío que se usará para fines de control.
+		delete = False
 		try: #Bloque try para controlar la excepción de archivo no encontrado.
 			with open(filename, "r") as f: #Se abre un bloque de este tipo para abrir el archivo con un un manejador y cerrarlo al finalizar su contenido.
 				paths = json.load(f) #Se carga el contenido del archivo json en el diccionario declarado arriba.
 				for path, identifier in zip(paths['path'], paths['identifier']):
-					self.db.execute("insert into paths(path, identifier) values(?, ?)", (path, identifier))
+					self.db.execute("insert into paths(path, identifier, fixed) values(?, ?, ?)", (path, identifier, 0))
 
-				os.remove(filename)
+				delete = True
 
 		except FileNotFoundError: #Excepción para controlar el error provocado por si el archivo no existe.
 			#no se hace nada.
@@ -80,6 +116,10 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			#Translators: The user is notified that the configuration file could not be loaded correctly due to some data decoding error.
 			ui.message(_("error en la decodificación de json."))
 
+		if delete:
+			self.db.commit()
+			os.remove(filename)
+
 	def _loadInfo(self):
 		"""
 		Método de carga de la información de las rutas y sus identificadores respectivos (si existe una configuración guardada).
@@ -89,13 +129,15 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		try: #Bloque try para controlar la excepción de algún error sqlite.
 			results = self.db.execute("select * from paths")
 			paths = [list(result) for result in results]
-			finalPaths = []
-			for fixed in paths:
-				if fixed[2] == True:
-					finalPaths.append(fixed)
-					paths.remove(fixed)
+			finalPaths = [fixed for fixed in paths if fixed[2] == 1]
+			if finalPaths:
+				self.lastFixed = paths.index(finalPaths[-1])
+				paths = [path for path in paths if path not in finalPaths]
+				finalPaths.extend(paths)
+				self.paths = finalPaths
 
-			self.paths = finalPaths.extend(paths)
+			else:
+				self.paths = paths
 
 		except sqlite3.OperationalError as e:
 			ui.message(_("Ha ocurrido un error al obtener las rutas: {}").format(e))
@@ -107,7 +149,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		#se añade un bloque try para poder manejar algunos errores con la db.
 		try:
 			self.db.commit()
-				return True #Se devuelve True por fines de control si la operación es exitosa.
+			return True #Se devuelve True por fines de control si la operación es exitosa.
 		except sqlite3.OperationalError as e: #manejo de errores de sqlite, se añade el manejador "e" para poder devolver el error al usuario.
 			self.db.rollback()
 			#Translators: An error message is displayed if the content cannot be saved to the file.
@@ -135,6 +177,28 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 		return None #Si no hay ningún marcador se devuelve None.
 
+	def addPath(self, path, identifier, fixed=0):
+		identifiers = [value[1] for value in self.paths]
+		if os.path.exists(path) and not identifier in identifiers:
+			#Si esta verificación procede, se añade lo recuperado de los cuadros a las listas correspondientes, para luego cambiar la variable empty a True por fines de control.
+			self.paths.append([path, identifier, fixed])
+			self.db.execute("insert into paths(path, identifier, fixed) values(?, ?, ?)", (path, identifier, fixed))
+			self.db.commit()
+			if self.empty:
+				self.empty = False
+
+			result = self._saveInfo() #Se almacena el valor devuelto por _saveInfo (método explicado más adelante).
+			if result: #Si es True se emite un tono y un mensaje confirmando esta operación.
+				tones.beep(432, 300)
+				#Translators: Message to indicate that the operation was successful and the path added to the list.
+				ui.message(_("Ruta añadida correctamente."))
+				return True
+
+		else: #Si la operación anterior falla se emite un mensaje para advertir al usuario.
+			#Translators: Message to indicate that the operation failed because the path doesn't exists, is misspelled or the identifier already exists.
+			ui.message(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."))
+			return False
+
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
 	#Translators: The function of the command is described, which is to copy the full path of the current position in the virtual menu.
 	@script(
@@ -145,6 +209,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		"""
 		Método que ejecuta la acción de copiar al portapapeles la ruta completa correspondiente a la posición actual del contador en el menú virtual.
 		"""
+		self.db.close()
 		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
 			#Translators: Error message to indicate that there are no saved paths in the list.
 			ui.message(_("¡No hay rutas guardadas!"))

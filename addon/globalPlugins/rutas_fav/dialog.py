@@ -1,8 +1,8 @@
 import ui
 import wx
-import tones
 import addonHandler
 addonHandler.initTranslation()
+import os
 
 class pathsDialog(wx.Dialog):
 	"""
@@ -36,7 +36,7 @@ class pathsDialog(wx.Dialog):
 		self.browseBTN.Bind(wx.EVT_BUTTON, self.onBrowse)
 
 		label3 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Rutas añadidas:"))
-		self.list = wx.ListCtrl(self.Panel, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_SORT_ASCENDING | wx.LC_VRULES | wx.LC_SINGLE_SEL)
+		self.list = wx.ListCtrl(self.Panel, wx.ID_ANY, style=wx.LC_LIST | wx.LC_SINGLE_SEL)
 		self.list.Bind(wx.EVT_CONTEXT_MENU, self.onActions)
 
 		#Se crean los botones junto con su respectiva vinculación a un método de evento que ejecutará ciertas acciones en base a si son pulsados.
@@ -77,6 +77,12 @@ class pathsDialog(wx.Dialog):
 		self.Panel.SetSizer(sizeV)
 		self.CenterOnScreen()
 
+		self.addListItems()
+
+	def addListItems(self):
+		for idx, row in enumerate(self.data.paths):
+			self.list.InsertItem(idx, _("({}Nombre: {}, Ruta: {}").format("(Fijado) " if row[2]==1 else "", row[1], row[0]))
+
 	def onActions(self, event):
 		self.menu = wx.Menu()
 		item1 = self.menu.Append(1, _("Fijar ruta"))
@@ -92,6 +98,26 @@ class pathsDialog(wx.Dialog):
 			return
 
 		id = event.GetId()
+		item = self.list.GetItemText(self.list.GetFocusedItem())
+		if item.startswith("(Fijado)"):
+			item = item.replace(f"{item.split(')')[0]}) ", "", 1).strip()
+
+		identifier = item.split(',')[0].split(':')[1].strip()
+		path = item.split(',')[1]
+		path = path.replace(f"{path.split(':')[0]}: ", "", 1).strip()
+		if id == 1:
+			result = self.data.fix(path, identifier)
+			if result:
+				ui.message(_("Ruta fijada correctamente."))
+				self.list.DeleteAllItems()
+				self.addListItems()
+
+		elif id == 2:
+			result = self.data.unfix(path, identifier)
+			if result:
+				ui.message(_("Ruta desfijada correctamente."))
+				self.list.DeleteAllItems()
+				self.addListItems()
 
 	def onBrowse(self, event):
 		with wx.DirDialog(self, _("Selecciona una carpeta"), style=wx.DD_DEFAULT_STYLE) as dialog:
@@ -114,23 +140,7 @@ class pathsDialog(wx.Dialog):
 		#Se obtienen los valores de los campos de texto para luego verificar si estos existen en el sistema de archivos y si su identificador no existe ya en la lista de la clave 'identifier' en el diccionario paths.
 		pathValue, identifierValue = self.path.GetValue(), self.identifier.GetValue()
 		pathValue = self.data.checkPath(pathValue)
-		if os.path.exists(pathValue) and not identifierValue in self.data.paths['identifier']:
-			#Si esta verificación procede, se añade lo recuperado de los cuadros a las listas correspondientes, para luego cambiar la variable empty a True por fines de control.
-			self.data.paths['path'].append(pathValue)
-			self.data.paths['identifier'].append(identifierValue)
-			if self.data.empty:
-				self.data.empty = False
-
-			result = self.data._saveInfo() #Se almacena el valor devuelto por _saveInfo (método explicado más adelante).
-			if result: #Si es True se emite un tono y un mensaje confirmando esta operación.
-				tones.beep(432, 300)
-				#Translators: Message to indicate that the operation was successful and the path added to the list.
-				ui.message(_("Ruta añadida correctamente."))
-
-		else: #Si la operación anterior falla se emite un mensaje para advertir al usuario.
-			#Translators: Message to indicate that the operation failed because the path doesn't exists, is misspelled or the identifier already exists.
-			ui.message(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."))
-
+		self.data.addPath(pathValue, identifierValue, 0)
 		if self.IsModal(): #Si el diálogo es modal, es decir, bloquea la interacción con otras interfaces cerrarlo y establecer su valor de retorno en 0.
 			self.EndModal(wx.ID_CANCEL)
 
@@ -163,4 +173,3 @@ class pathsDialog(wx.Dialog):
 			self.EndModal(wx.ID_CANCEL)
 		else:
 			self.Close()
-
