@@ -141,6 +141,11 @@ class pathsDialog(wx.Dialog):
 				wx.MessageBox(_("Ruta eliminada correctamente."), _("Información"), wx.ICON_INFORMATION)
 				self.list.DeleteAllItems()
 				self.addListItems()
+				if self.data.counter >= len(self.data.paths):
+					self.data.counter = len(self.data.paths) - 1
+				# Si la lista queda vacía, marca la variable `empty` como `True`.
+				if not self.data.paths:
+					self.data.empty = True
 				return True
 
 		elif id == 4:
