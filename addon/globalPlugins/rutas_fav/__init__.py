@@ -36,7 +36,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	"""
 	Clase que hereda de globalPluginHandler.GlobalPlugin para hacer los scripts relacionados a cada combinación de teclas pulsada, así como otras operaciones lógicas para el funcionamiento del addon.
 	"""
-	#Translators: name of the addon category that will appear in the input gestures section.
+	#Translators: nombre de la categoría de complemento que aparecerá en la sección de gestos de entrada.
 	scriptCategory = _("Rutas fav")
 	def __init__(self):
 		"""
@@ -78,7 +78,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			return True
 
 		except ValueError:
-			ui.message(_("No fue posible fijar la ruta."))
+			#Translators: Mensaje que indica que no fue posible fijar la ruta
+			gui.messageBox(_("No fue posible fijar la ruta."), _("Error"))
 			return False
 
 	def unfix(self, path, identifier):
@@ -92,7 +93,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			return True
 
 		except ValueError:
-			ui.message(_("No fue posible desfijar la ruta."))
+			#Translators: Mensaje que indica que no fue posible desfijar la ruta.
+			gui.messageBox(_("No fue posible desfijar la ruta."), _("Error"))
 			return False
 
 	def convertFormat(self):
@@ -113,7 +115,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 		except json.JSONDecodeError:
 			#se hace una excepción en caso de que la lectura/decodificación de algún objeto JSON no pueda ser llevada a cabo.
-			#Translators: The user is notified that the configuration file could not be loaded correctly due to some data decoding error.
+			#Translators: Se notifica al usuario que el archivo de configuración no se pudo cargar correctamente debido a algún error de decodificación de datos.
 			ui.message(_("error en la decodificación de json."))
 
 		if delete:
@@ -140,6 +142,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				self.paths = paths
 
 		except sqlite3.OperationalError as e:
+			#Translators: Mensaje que indica que ocurrió un error al obtener las rutas.
 			ui.message(_("Ha ocurrido un error al obtener las rutas: {}").format(e))
 
 	def _saveInfo(self):
@@ -152,9 +155,49 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			return True #Se devuelve True por fines de control si la operación es exitosa.
 		except sqlite3.OperationalError as e: #manejo de errores de sqlite, se añade el manejador "e" para poder devolver el error al usuario.
 			self.db.rollback()
-			#Translators: An error message is displayed if the content cannot be saved to the file.
+			#Translators: Se muestra un mensaje de error si el contenido no se puede guardar en el archivo.
 			ui.message(_("Error al guardar las rutas: {}").format(str(e))) #se le muestra el error al usuario usando ui
 			return False  #se retorna falso por motivos de control
+
+	def renamePath(self, old_identifier, new_path, new_identifier):
+		"""
+		Método para renombrar una ruta existente.
+		"""
+		try:
+			# Buscar el índice de la ruta existente
+			idx = next(i for i, v in enumerate(self.paths) if v[1] == old_identifier)
+			old_path, fixed = self.paths[idx][0], self.paths[idx][2]
+			# Actualizar la ruta en la lista y en la base de datos
+			self.paths[idx] = [new_path, new_identifier, fixed]
+			self.db.execute("update paths set path=?, identifier=? where identifier=?", (new_path, new_identifier, old_identifier))
+			self.db.commit()
+
+			return True
+
+		except StopIteration:
+			#Translators: Mensaje que indica que la ruta no fue encontrada al querer renombrarla, junto con el título de la ventana.
+			gui.messageBox(_("Ruta no encontrada."), _("Información"))
+			return False
+			
+	def deletePath(self, identifier):
+		"""
+		Método para eliminar una ruta existente.
+		"""
+		try:
+			# Buscar el índice de la ruta existente
+			idx = next(i for i, v in enumerate(self.paths) if v[1] == identifier)
+
+			# Eliminar la ruta de la lista y de la base de datos
+			self.paths.pop(idx)
+			self.db.execute("delete from paths where identifier=?", (identifier,))
+			self.db.commit()
+			return True
+
+		except StopIteration:
+			#Translators: Mensaje que indica que la ruta no fue encontrada al intentar eliminarla, junto con el título de la ventana.
+			gui.messageBox(_("Ruta no encontrada."), _("Información"))
+			return False
+
 
 	def checkPath(self, path):
 		"""
@@ -190,17 +233,17 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			result = self._saveInfo() #Se almacena el valor devuelto por _saveInfo (método explicado más adelante).
 			if result: #Si es True se emite un tono y un mensaje confirmando esta operación.
 				tones.beep(432, 300)
-				#Translators: Message to indicate that the operation was successful and the path added to the list.
+				#Translators: Mensaje para indicar que la operación fue exitosa y la ruta se añadió a la lista.
 				ui.message(_("Ruta añadida correctamente."))
 				return True
 
 		else: #Si la operación anterior falla se emite un mensaje para advertir al usuario.
-			#Translators: Message to indicate that the operation failed because the path doesn't exists, is misspelled or the identifier already exists.
-			ui.message(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."))
+			#Translators: Mensaje para indicar que la operación falló porque la ruta no existe, está mal escrita o el identificador ya existe.
+			gui.messageBox(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."), _("Error"))
 			return False
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
-	#Translators: The function of the command is described, which is to copy the full path of the current position in the virtual menu.
+	#Translators: descripción para el comando para copiar la ruta completa de la posición actual en el menú virtual.
 	@script(
 		description=_("Copia la ruta completa correspondiente a la posición actual del menú virtual"),
 		gesture=None
@@ -211,14 +254,14 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		"""
 		self.db.close()
 		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
-			#Translators: Error message to indicate that there are no saved paths in the list.
+			#Translators: Mensaje de error para indicar que no hay rutas guardadas en la lista.
 			ui.message(_("¡No hay rutas guardadas!"))
 			return
 
 		api.copyToClip(self.paths[self.counter][0], True)
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
-	#Translators: The function of the command is described, which is to open the dialog to enter the required data and thus add it to the list.
+	#Translators:  descripción del comando para abrir el diálogo para ingresar los datos requeridos y así agregarlos a la lista.
 	@script(
 		description=_("Abre el diálogo para ingresar nuevas rutas a añadir a la lista de favoritas"),
 		gesture="kb:alt+NVDA+a"
@@ -235,7 +278,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			gui.mainFrame.postPopup()
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
-	#Translators: The function of the command is described, which is to open the selected route or delete it from the list if the command is pressed twice quickly.
+	#Translators:  Descripción para el comando, el cual permite abrir la ruta seleccionada o eliminarla de la lista si se presiona dos veces rápidamente el comando.
 	@script(
 		description=_("Abre o elimina (si se pulsa 2 veces rápidamente) la ruta seleccionada en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+l"
@@ -245,12 +288,12 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método para ejecutar la acción de lanzar o eliminar la ruta seleccionada en el menú virtual.
 		"""
 		if self.empty: #Si no hay ninguna ruta guardada, se lanza un mensaje de error y se detiene la ejecución de la función.
-			#Translators: Error message to indicate that there are no saved paths in the list.
+			#Translators: Mensaje de error para indicar que no hay rutas guardadas en la lista.
 			ui.message(_("¡No hay rutas guardadas!"))
 			return
 
 		if not os.path.exists(self.paths[self.counter][0]): #Si la ruta a verificar no existe se lanza un mensaje de error y se elimina del diccionario.
-			#Translators: Error message to indicate that the path doesn't exists or is misspelled.
+			#Translators: Mensaje de error para indicar que la ruta no existe o está mal escrita.
 			ui.message(_("La ruta guardada no existe o está mal escrita."))
 			del self.paths[self.counter]
 			self._saveInfo() #Se guardan las rutas actuales.
@@ -267,14 +310,14 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		else: #De lo contrario, la ruta se elimina.
 			del self.paths[self.counter]
 
-			#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
+			#Translators: Mensaje para indicar que la operación fue exitosa y se eliminó la ruta junto con su identificador.
 			ui.message(_("Ruta eliminada correctamente de la lista."))
 			self._saveInfo()
 			if not self.paths and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
 				self.empty = True
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
-	#Translators: The function of the command is described, which is to navigate to the previous item in the paths list.
+	#Translators: Descripción para el comando, el cual permite ir hacia atrás en el menú virtual.
 	@script(
 		description=_("Va al elemento anterior en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+j"
@@ -284,7 +327,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método que hace la acción de ir hacia atrás en el menú virtual.
 		"""
 		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
-			#Translators: Error message to indicate that there are no saved paths in the list.
+			#Translators: Mensaje de error para indicar que no hay rutas guardadas en la lista.
 			ui.message(_("¡No hay rutas guardadas!"))
 
 		else: #Si el resultado de la condición es lo contrario, recorre el contador en 1 hacia atrás y lo verbaliza, no sin antes verificar si este es menor a 0, para si es así, recorrerse hasta el final.
@@ -292,11 +335,11 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if self.counter < 0:
 				self.counter = len(self.paths)-1
 
-			#Translators: Message to be spoken when the counter position changes, being composed of the identifier and the current position based on the number of routes inserted.
+			#Translators: Mensaje que indica cuando cambia la posición del contador, compuesto por el identificador y la posición actual en función del número de rutas insertadas.
 			ui.message(_("{} {} de {}").format(self.paths[self.counter][1], self.counter+1, len(self.paths)))
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
-	#Translators: The function of the command is described, which is to navigate to the next item in the paths list.
+	#Translators: Descripción del comando, el cual permite ir hacia adelante en el menú virtual.
 	@script(
 		description=_("Va al siguiente elemento en la lista de rutas favoritas"),
 		gesture="kb:alt+NVDA+k"
@@ -306,7 +349,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		Método que hace la acción de ir hacia adelante en el menú virtual.
 		"""
 		if self.empty: #Si no hay rutas guardadas se lanza un mensaje de error.
-			#Translators: Error message to indicate that there are no saved paths in the list.
+			#Translators: Mensaje de error para indicar que no hay rutas guardadas en la lista.
 			ui.message(_("¡No hay rutas guardadas!"))
 
 		else: #Si el resultado de la condición es lo contrario, recorre el contador en 1 hacia adelante y lo verbaliza, no sin antes verificar si este excede la longitud de elementos guardados, para si es así, volver a la posición original.
@@ -314,5 +357,5 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			if self.counter > len(self.paths)-1:
 				self.counter = 0
 
-			#Translators: Message to be spoken when the counter position changes, being composed of the identifier and the current position based on the number of routes inserted.
+			#Translators: Mensaje que indica cuando cambia la posición del contador, compuesto por el identificador y la posición actual en función del número de rutas insertadas.
 			ui.message(_("{} {} de {}").format(self.paths[self.counter][1], self.counter+1, len(self.paths)))
