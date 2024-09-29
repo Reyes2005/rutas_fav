@@ -198,7 +198,6 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			gui.messageBox(_("Ruta no encontrada."), _("Información"))
 			return False
 
-
 	def checkPath(self, path):
 		"""
 		Método para verificar si la ruta pasada como parámetro tiene algún marcador para acortar el tamaño de la misma.
@@ -295,8 +294,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		if not os.path.exists(self.paths[self.counter][0]): #Si la ruta a verificar no existe se lanza un mensaje de error y se elimina del diccionario.
 			#Translators: Mensaje de error para indicar que la ruta no existe o está mal escrita.
 			ui.message(_("La ruta guardada no existe o está mal escrita."))
-			del self.paths[self.counter]
-			self._saveInfo() #Se guardan las rutas actuales.
+			self.deletePath(self.paths[self.counter][1])
 			if self.counter > len(self.paths)-1: #Si la variable de contador para navegar en el menú excede la cantidad de elementos del diccionario se recorre hasta el final.
 				self.counter = len(self.paths)-1
 
@@ -308,7 +306,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			os.startfile(self.paths[self.counter][0])
 
 		else: #De lo contrario, la ruta se elimina.
-			del self.paths[self.counter]
+			self.deletePath(self.paths[self.counter][1])
 
 			#Translators: Mensaje para indicar que la operación fue exitosa y se eliminó la ruta junto con su identificador.
 			ui.message(_("Ruta eliminada correctamente de la lista."))

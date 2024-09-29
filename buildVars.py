@@ -25,9 +25,9 @@ addon_info = {
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("Este addon tiene como finalidad el tener una gestión simple pero eficaz de rutas favoritas para así, en determinados casos, abrir estas rutas rápidamente"),
 	# version
-	"addon_version": "1.0.2",
+	"addon_version": "1.1",
 	# Author(s)
-	"addon_author": "Ángel Reyes <angeldelosreyesfaz@gmail.com>",
+	"addon_author": "Ángel Reyes <angeldelosreyesfaz@gmail.com>, Marco leija <marcomolinaleija@hotmail.com>",
 	# URL for the add-on documentation support
 	"addon_url": "https://github.com/reyes2005/rutas_fav/",
 	# URL for the add-on repository where the source code can be found
@@ -37,7 +37,7 @@ addon_info = {
 	# Minimum NVDA version supported (e.g. "2018.3.0", minor version is optional)
 	"addon_minimumNVDAVersion": "2023.1",
 	# Last NVDA version supported/tested (e.g. "2018.4.0", ideally more recent than minimum version)
-	"addon_lastTestedNVDAVersion": "2024.1",
+	"addon_lastTestedNVDAVersion": "2024.3.1",
 	# Add-on update channel (default is None, denoting stable releases,
 	# and for development releases, use "dev".)
 	# Do not change unless you know what you are doing!
